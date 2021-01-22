@@ -1,0 +1,1 @@
+module "github.com/minami14/art"
