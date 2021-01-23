@@ -1,7 +1,58 @@
 package art
 
-func setSyscall(a *Art) {
-	a.Syscall = map[uint64]func() error{
+import (
+	"fmt"
+	"syscall"
+)
+
+func (a *Art) Syscall(...string) error {
+	rax, err := a.Get("RAX")
+	if err != nil {
+		return err
+	}
+
+	args, err := a.syscallArgs(6)
+	if err != nil {
+		return err
+	}
+
+	if a.UseHostKernel {
+		r1, r2, _ := syscall.Syscall6(uintptr(rax), uintptr(args[0]), uintptr(args[1]), uintptr(args[2]), uintptr(args[3]), uintptr(args[4]), uintptr(args[5]))
+
+		if err := a.Set("RAX", uint64(r1)); err != nil {
+			return err
+		}
+
+		if err := a.Set("RDX", uint64(r2)); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	call, ok := a.SystemCalls[rax]
+	if !ok {
+		return fmt.Errorf("invalid syscall number: %v", rax)
+	}
+
+	return call()
+}
+
+func (a *Art) syscallArgs(n int) ([]uint64, error) {
+	var args []uint64
+	for _, r := range []string{"RDI", "RSI", "RDX", "R10", "R8", "R9"}[:n] {
+		v, err := a.Get(r)
+		if err != nil {
+			return nil, err
+		}
+		args = append(args, v)
+	}
+
+	return args, nil
+}
+
+func setSyscallLinux(a *Art) {
+	a.SystemCalls = map[uint64]func() error{
 		0:   a.syscallRead,
 		1:   a.syscallWrite,
 		2:   a.syscallOpen,

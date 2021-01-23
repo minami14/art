@@ -85,7 +85,7 @@ func run() error {
 }
 
 func generate(syscalls []systemCall) (*bytes.Buffer, error) {
-	buf := bytes.NewBufferString("package art\n\nfunc setSyscall(a *Art) {\n\ta.Syscall = map[uint64]func() error{\n")
+	buf := bytes.NewBufferString("package art\n\nfunc setSyscall(a *Art) {\n\ta.SystemCalls = map[uint64]func() error{\n")
 	for _, s := range syscalls {
 		str := fmt.Sprintf("\t\t%v: a.syscall%v,\n", s.number, s.name)
 		if _, err := buf.WriteString(str); err != nil {

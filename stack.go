@@ -19,12 +19,11 @@ var (
 	ErrStackOverflow  = errors.New("stack overflow")
 )
 
-func (s *Stack) Pop(dst *uint64) error {
+func (s *Stack) Pop() (uint64, error) {
 	if len(s.Buffer) == 0 {
-		return ErrStackUnderflow
+		return 0, ErrStackUnderflow
 	}
-	*dst = s.Buffer[len(s.Buffer)-1]
-	return nil
+	return s.Buffer[len(s.Buffer)-1], nil
 }
 
 func (s *Stack) Push(src uint64) error {
