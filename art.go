@@ -7,11 +7,13 @@ type Art struct {
 	Stack      *Stack
 	Memory     []byte
 	Operations map[string]Operation
+	Syscall    map[uint64]func() error
 }
 
 func New() *Art {
 	a := new(Art)
 	setOperations(a)
+	setSyscall(a)
 	return a
 }
 
